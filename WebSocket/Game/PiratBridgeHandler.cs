@@ -184,25 +184,18 @@ public class PiratBridgeHandler
 
     private async Task BroadcastGameState(PiratBridgeGame game)
     {
+        var response = new
+        {
+            type = "GAME_STATE",
+            gameId = game.GameId,
+            players = game.Players.Select(p => new { name = p.Name, score = p.Score }).ToList(),
+            state = game.State.ToString(),
+            currentRound = game.CurrentRound
+        };
+
         foreach (var player in game.Players)
         {
-            var response = new
-            {
-                type = "GAME_STATE",
-                gameId = game.GameId,
-                players = game.Players.Select(p => new { p.Name, p.Score }),
-                state = game.State.ToString(),
-                currentRound = game.CurrentRound
-            };
-
-            var json = JsonSerializer.Serialize(response);
-            var bytes = Encoding.UTF8.GetBytes(json);
-            await player.Socket.SendAsync(
-                new ArraySegment<byte>(bytes),
-                WebSocketMessageType.Text,
-                true,
-                CancellationToken.None
-            );
+            await SendToPlayer(player, response);
         }
     }
 

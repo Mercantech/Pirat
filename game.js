@@ -113,7 +113,12 @@ class PiratBridgeClient {
 
     const playersDiv = document.getElementById("players");
     playersDiv.innerHTML = state.players
-      .map((p) => `<div>${p.name}: ${p.score} point</div>`)
+      .map((player) => {
+        console.log("Player data:", player); // Debug logging
+        return `<div>${player.name || "Ukendt"}: ${
+          player.score || 0
+        } point</div>`;
+      })
       .join("");
   }
 }
