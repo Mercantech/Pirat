@@ -92,6 +92,11 @@ public class PiratBridgeHandler
         _currentPlayer = new Player(playerName, _webSocket);
 
         var game = new PiratBridgeGame();
+        while (Games.Any(g => g.GameId == game.GameId))
+        {
+            game = new PiratBridgeGame();
+        }
+
         game.AddPlayer(_currentPlayer);
         Games.Add(game);
 

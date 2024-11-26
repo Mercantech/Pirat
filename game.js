@@ -60,7 +60,7 @@ class PiratBridgeClient {
         return;
       }
 
-      this.socket = new WebSocket("wss://localhost:7277/ws");
+      this.socket = new WebSocket("wss://pirat.mercantec.tech/ws");
 
       this.socket.onopen = () => {
         console.log("Forbundet til server");
