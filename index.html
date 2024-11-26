@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Piratbridge Online</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <div id="lobby" class="screen">
+        <h1>Piratbridge Online</h1>
+        <button id="create-game">Opret nyt spil</button>
+        <button id="join-game">Tilslut spil</button>
+      </div>
+
+      <div id="game-board" class="screen hidden">
+        <div id="players"></div>
+        <div id="current-hand"></div>
+        <div id="betting-area">
+          <input type="number" id="bet-input" min="0" max="7" />
+          <button id="place-bet">Afgiv bud</button>
+        </div>
+      </div>
+    </div>
+    <script src="game.js"></script>
+  </body>
+</html>

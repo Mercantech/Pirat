@@ -1,0 +1,29 @@
+.screen {
+  padding: 20px;
+}
+
+.hidden {
+  display: none;
+}
+
+#game-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#current-hand {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.card {
+  width: 70px;
+  height: 100px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
