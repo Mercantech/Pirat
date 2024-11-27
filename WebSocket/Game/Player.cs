@@ -9,6 +9,7 @@ public class Player
     public int Score { get; set; }
     public int? CurrentBet { get; set; }
     public int TricksTaken { get; set; }
+    public int NumMatches { get; set; }
 
     public Player(string name, System.Net.WebSockets.WebSocket socket)
     {

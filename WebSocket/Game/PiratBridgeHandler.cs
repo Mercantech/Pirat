@@ -73,6 +73,9 @@ public class PiratBridgeHandler
                 case "JOIN_GAME":
                     await HandleJoinGame(command);
                     break;
+                case "TAKE_MATCHES":
+                    await HandleTakeMatches(command);
+                    break;
                 default:
                     await SendError($"Ukendt kommando: {command.Type}");
                     break;
@@ -129,6 +132,34 @@ public class PiratBridgeHandler
         {
             await SendError("Kan ikke tilslutte til spillet");
             return;
+        }
+
+        await BroadcastGameState(game);
+    }
+
+    private async Task HandleTakeMatches(GameCommand command)
+    {
+        var gameId = command.Data.GetProperty("gameId").GetString();
+        var numMatches = command.Data.GetProperty("numMatches").GetInt32();
+
+        var game = Games.FirstOrDefault(g => g.GameId == gameId);
+        if (game == null)
+        {
+            await SendError("Spillet findes ikke");
+            return;
+        }
+
+        if (game.State != GameState.Betting)
+        {
+            await SendError("Du kan ikke tage tændstikker i øjeblikket");
+            return;
+        }
+
+        game.TakeMatches(_currentPlayer, numMatches);
+
+        if (game.AllPlayersBet)
+        {
+            game.StartRound();
         }
 
         await BroadcastGameState(game);

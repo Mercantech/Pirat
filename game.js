@@ -6,6 +6,7 @@ class PiratBridgeClient {
     this.connected = false;
 
     this.initializeEventListeners();
+    this.fetchCards();
   }
 
   initializeEventListeners() {
@@ -60,28 +61,43 @@ class PiratBridgeClient {
         return;
       }
 
-      this.socket = new WebSocket("wss://pirat.mercantec.tech/ws");
+      const urls = [
+        "ws://localhost:5293/ws",
+        "wss://pirat.mercantec.tech/ws",
+      ];
 
-      this.socket.onopen = () => {
-        console.log("Forbundet til server");
-        this.connected = true;
-        resolve();
+      const tryConnect = (index) => {
+        if (index >= urls.length) {
+          reject(new Error("Kunne ikke oprette forbindelse til nogen af de angivne URLs"));
+          return;
+        }
+
+        this.socket = new WebSocket(urls[index]);
+
+        this.socket.onopen = () => {
+          console.log(`Forbundet til server: ${urls[index]}`);
+          this.connected = true;
+          resolve();
+        };
+
+        this.socket.onclose = () => {
+          console.log(`Forbindelse lukket: ${urls[index]}`);
+          this.connected = false;
+          tryConnect(index + 1);
+        };
+
+        this.socket.onerror = (error) => {
+          console.error(`WebSocket fejl: ${urls[index]}`, error);
+          this.connected = false;
+          tryConnect(index + 1);
+        };
+
+        this.socket.onmessage = (event) => {
+          this.handleMessage(JSON.parse(event.data));
+        };
       };
 
-      this.socket.onclose = () => {
-        console.log("Forbindelse lukket");
-        this.connected = false;
-      };
-
-      this.socket.onerror = (error) => {
-        console.error("WebSocket fejl:", error);
-        this.connected = false;
-        reject(error);
-      };
-
-      this.socket.onmessage = (event) => {
-        this.handleMessage(JSON.parse(event.data));
-      };
+      tryConnect(0);
     });
   }
 
@@ -107,6 +123,8 @@ class PiratBridgeClient {
       this.gameId = state.gameId;
       alert(`Dit spil-ID er: ${this.gameId}`);
     }
+    const bettingControls = document.getElementById("betting-controls");
+    bettingControls.classList.toggle("hidden", state.state !== "Betting");
 
     document.getElementById("lobby").classList.add("hidden");
     document.getElementById("game-board").classList.remove("hidden");
@@ -121,9 +139,57 @@ class PiratBridgeClient {
       })
       .join("");
   }
+
+  async fetchCards() {
+    const ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+    const suits = ['C', 'D', 'H', 'S'];
+    const cards = [];
+
+    for (const suit of suits) {
+      for (const rank of ranks) {
+        cards.push({ rank, suit });
+      }
+    }
+    cards.push({ rank: 'Joker', suit: 'J' });
+
+    this.displayCards(cards);
+  }
+
+  displayCards(cards) {
+    const cardDisplay = document.getElementById('card-display');
+    const suitOrder = ['S', 'H', 'D', 'C', 'J'];
+    const suitNames = {
+      'S': 'Spar',
+      'H': 'Hjerter',
+      'D': 'Ruder',
+      'C': 'Klør',
+      'J': 'Joker'
+    };
+
+    const cardsBySuit = suitOrder.map(suit => {
+      const suitCards = cards.filter(card => card.suit === suit);
+      return `
+        <div class="card-suit">
+          <h3>${suitNames[suit]}</h3>
+          ${suitCards.map(card => `
+            <div class="card">
+              <img src="./images/cards/${card.rank}${card.suit}.svg" alt="${card.rank} of ${card.suit}">
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }).join('');
+
+    cardDisplay.innerHTML = cardsBySuit;
+  }
 }
 
 // Start spillet når siden er indlæst
 window.addEventListener("load", () => {
   window.game = new PiratBridgeClient();
+});
+
+document.getElementById("take-matches").addEventListener("click", () => {
+  const numMatches = parseInt(document.getElementById("num-matches").value);
+  this.sendCommand("TAKE_MATCHES", { gameId: this.gameId, numMatches });
 });
