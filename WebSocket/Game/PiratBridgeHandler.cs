@@ -76,6 +76,9 @@ public class PiratBridgeHandler
                 case "TAKE_MATCHES":
                     await HandleTakeMatches(command);
                     break;
+                case "LIST_SESSIONS":
+                    await HandleListSessions();
+                    break;
                 default:
                     await SendError($"Ukendt kommando: {command.Type}");
                     break;
@@ -163,6 +166,18 @@ public class PiratBridgeHandler
         }
 
         await BroadcastGameState(game);
+    }
+
+    private async Task HandleListSessions()
+    {
+        var sessionList = Games.Select(g => new { gameId = g.GameId, state = g.State.ToString() }).ToList();
+        var response = new
+        {
+            type = "SESSION_LIST",
+            sessions = sessionList
+        };
+
+        await SendMessage(response);
     }
 
     private async Task SendGameState(PiratBridgeGame game)
