@@ -71,12 +71,15 @@ public class PiratBridgeHandler
                     await HandleCreateGame(command);
                     break;
                 case "JOIN_GAME":
+                    Console.WriteLine("Starter HandleJoinGame");
                     await HandleJoinGame(command);
                     break;
                 case "TAKE_MATCHES":
+                    Console.WriteLine("Starter HandleTakeMatches");
                     await HandleTakeMatches(command);
                     break;
                 case "LIST_SESSIONS":
+                    Console.WriteLine("Starter HandleListSessions");
                     await HandleListSessions();
                     break;
                 default:
