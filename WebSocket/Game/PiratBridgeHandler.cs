@@ -82,6 +82,10 @@ public class PiratBridgeHandler
                     Console.WriteLine("Starter HandleListSessions");
                     await HandleListSessions();
                     break;
+                case "START_GAME":
+                    Console.WriteLine("Starter HandleStartGame");
+                    await HandleStartGame(command);
+                    break;
                 default:
                     await SendError($"Ukendt kommando: {command.Type}");
                     break;
@@ -181,6 +185,33 @@ public class PiratBridgeHandler
         };
 
         await SendMessage(response);
+    }
+
+    private async Task HandleStartGame(GameCommand command)
+    {
+        var gameId = command.Data.GetProperty("gameId").GetString();
+        var game = Games.FirstOrDefault(g => g.GameId == gameId);
+        
+        if (game == null)
+        {
+            await SendError("Spillet findes ikke");
+            return;
+        }
+
+        if (game.Players[0] != _currentPlayer)
+        {
+            await SendError("Kun værten kan starte spillet");
+            return;
+        }
+
+        if (game.Players.Count < 2)
+        {
+            await SendError("Der skal være mindst 2 spillere for at starte spillet");
+            return;
+        }
+
+        game.StartNewRound();
+        await BroadcastGameState(game);
     }
 
     private async Task SendGameState(PiratBridgeGame game)
